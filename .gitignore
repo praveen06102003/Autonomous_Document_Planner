@@ -1,0 +1,15 @@
+# Python
+__pycache__/
+*.pyc
+
+# Virtual environment
+Backend/.venv/
+
+# Environment variables
+Backend/.env
+
+# Output
+Backend/output/
+
+# VS Code
+.vscode/
