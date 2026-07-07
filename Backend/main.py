@@ -19,6 +19,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
+
 from Models import (
     AgentRequest, AgentResponse,
     RefineRequest, RefineResponse,
@@ -107,9 +108,9 @@ def generate_doc(payload: GenerateDocRequest):
 
 
 # Serve generated .docx files for download
-app.mount("/output", StaticFiles(directory=OUTPUT_DIR), name="output")
+app.mount("/static", StaticFiles(directory="Frontend"), name="static")
 
 
 @app.get("/")
 def root():
-    return {"status": "ok", "docs": "/docs"}
+    return FileResponse("Frontend/index.html")
