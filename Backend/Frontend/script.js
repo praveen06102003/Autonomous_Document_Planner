@@ -1,8 +1,8 @@
 // script.js — talks to the FastAPI backend, renders the plan, and
 // drives the plan -> refine -> generate-doc flow.
 
-const API_BASE = "http://localhost:8000";
-
+// const API_BASE = "http://localhost:8000";
+const API_BASE = window.location.origin;
 // ---------- Element refs ----------
 
 const requestInput = document.getElementById("request-input");
