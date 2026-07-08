@@ -24,10 +24,13 @@ class AgentRequest(BaseModel):
 
 
 class AgentResponse(BaseModel):
-    plan_id: str                 # used to reference this plan in /refine and /generate-doc
-    title: str                   # short title the LLM derives for the doc, e.g. "RAG Project Plan"
-    tasks: list[TaskItem]
-    message: str                 # friendly note, e.g. "Here's a draft plan — let me know if you'd like changes."
+    is_plan: bool = True         # False when the message wasn't actually a planning request
+    plan_id: Optional[str] = None      # None when is_plan is False — no plan was created
+    title: Optional[str] = None
+    summary: Optional[str] = None
+    tasks: list[TaskItem] = []
+    message: str                 # for is_plan=False, this IS the conversational reply
+    revision: int = 1
 
 
 # ---------- POST /agent/refine ----------
@@ -40,7 +43,24 @@ class RefineRequest(BaseModel):
 class RefineResponse(BaseModel):
     plan_id: str
     title: str
+    summary: str
     tasks: list[TaskItem]
+    message: str
+    revision: int
+
+
+# ---------- POST /agent/update-tasks ----------
+# No LLM call here — just overwrites stored tasks with whatever the user
+# edited directly in the UI (e.g. status dropdowns), so /generate-doc
+# reflects the latest state without needing another refine round-trip.
+
+class UpdateTasksRequest(BaseModel):
+    plan_id: str
+    tasks: list[TaskItem]
+
+
+class UpdateTasksResponse(BaseModel):
+    plan_id: str
     message: str
 
 

@@ -4,101 +4,92 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Agent Console — Autonomous Document Planner</title>
-
-<link rel="stylesheet" href="/static/index.css">
+<link rel="stylesheet" href="index.css" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 </head>
 <body>
 
-  <div class="wrap">
+  <header class="console-header">
+    <div class="brand">
+      <span class="brand-mark">▸</span>
+      <span class="brand-name">Agent Console</span>
+    </div>
+    <span class="brand-sub">autonomous task planning &amp; document generation</span>
+  </header>
 
-    <header class="console-header">
-      <div class="brand">
-        <span class="brand-mark">▸</span>
-        <span class="brand-name">Agent Console</span>
+  <div class="workspace">
+
+    <!-- LEFT: conversation -->
+    <section class="chat-panel">
+      <div class="chat-scroll" id="chat-scroll">
+
+        <div class="chat-msg agent-msg">
+          <span class="msg-tag">agent</span>
+          <p>Hey! Tell me what you need done — a rough idea is enough, I'll fill in the gaps.</p>
+        </div>
+
       </div>
-      <span class="brand-sub">autonomous task planning &amp; document generation</span>
-    </header>
 
-    <section class="panel intake" id="intake-panel">
-      <label for="request-input" class="panel-label">What do you need done?</label>
-      <textarea
-        id="request-input"
-        placeholder="e.g. I need a plan for building a RAG project&#10;or: These are my tasks for tomorrow — finish embeddings, test FAISS search, fix the Streamlit bug"
-        rows="3"
-      ></textarea>
-      <div class="intake-row">
-        <span class="hint">Vague, specific, or partial — the agent fills the gaps.</span>
-        <button id="submit-btn" class="btn btn-primary">
-          <span class="btn-label">Generate plan</span>
+      <p class="error-banner hidden" id="error-banner"></p>
+
+      <div class="chat-input-row">
+        <textarea
+          id="chat-input"
+          placeholder="e.g. I need a plan for building a RAG project"
+          rows="2"
+        ></textarea>
+        <button id="chat-send-btn" class="btn btn-primary">
+          <span class="btn-label">Send</span>
         </button>
       </div>
     </section>
 
-    <section class="panel agent-log hidden" id="log-panel">
-      <div class="log-line" id="log-line">
-        <span class="log-tag">agent</span>
-        <span class="log-text" id="log-text">thinking<span class="dots"><span>.</span><span>.</span><span>.</span></span></span>
-      </div>
-    </section>
+    <!-- RIGHT: live plan canvas -->
+    <section class="canvas-panel">
 
-    <section class="panel plan-panel hidden" id="plan-panel">
-      <div class="plan-header">
-        <h2 id="plan-title">—</h2>
-        <span class="plan-id" id="plan-id-badge"></span>
+      <div class="canvas-empty" id="canvas-empty">
+        <span class="canvas-empty-icon">▸</span>
+        <p>Your plan will appear here once generated.</p>
       </div>
 
-      <table class="task-table">
-        <thead>
-          <tr>
-            <th class="col-tag"></th>
-            <th>Task</th>
-            <th>Notes</th>
-            <th>Status</th>
-            <th>Deadline</th>
-          </tr>
-        </thead>
-        <tbody id="task-tbody"></tbody>
-      </table>
+      <div class="canvas-content hidden" id="canvas-content">
+        <div class="plan-header">
+          <h2 id="plan-title">—</h2>
+          <span class="revision-badge" id="revision-badge">Revision 1</span>
+        </div>
 
-      <p class="agent-message" id="agent-message"></p>
+        <table class="task-table">
+          <thead>
+            <tr>
+              <th class="col-tag"></th>
+              <th>Task</th>
+              <th>Notes</th>
+              <th>Status</th>
+              <th>Deadline</th>
+            </tr>
+          </thead>
+          <tbody id="task-tbody"></tbody>
+        </table>
 
-      <div class="decision-row" id="decision-row">
-        <button id="looks-good-btn" class="btn btn-primary">Looks good — generate document</button>
-        <button id="needs-changes-btn" class="btn btn-ghost">Needs changes</button>
-      </div>
+        <div class="decision-row" id="decision-row">
+          <button id="looks-good-btn" class="btn btn-primary">Looks good — generate document</button>
+        </div>
 
-      <div class="feedback-row hidden" id="feedback-row">
-        <label for="feedback-input" class="panel-label">Tell the agent what to improve</label>
-        <textarea
-          id="feedback-input"
-          placeholder="e.g. Add a testing phase before launch, remove the UI task, push the timeline out by a day"
-          rows="2"
-        ></textarea>
-        <div class="intake-row">
-          <button id="cancel-feedback-btn" class="btn btn-ghost">Cancel</button>
-          <button id="refine-btn" class="btn btn-primary">
-            <span class="btn-label">Update plan</span>
-          </button>
+        <div class="result-panel hidden" id="result-panel">
+          <div class="result-icon">✓</div>
+          <div class="result-copy">
+            <h3>Document generated</h3>
+            <p id="result-filename"></p>
+          </div>
+          <a id="download-link" class="btn btn-primary" href="#" download>Download .docx</a>
         </div>
       </div>
-    </section>
 
-    <section class="panel result-panel hidden" id="result-panel">
-      <div class="result-icon">✓</div>
-      <div class="result-copy">
-        <h3>Document generated</h3>
-        <p id="result-filename"></p>
-      </div>
-      <a id="download-link" class="btn btn-primary" href="#" download>Download .docx</a>
     </section>
-
-    <p class="error-banner hidden" id="error-banner"></p>
 
   </div>
 
-<!-- <script src="script.js"></script> -->
-<script src="/static/script.js"></script>
+<script src="script.js"></script>
 </body>
 </html>
