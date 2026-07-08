@@ -154,6 +154,25 @@ def generate_doc(payload: GenerateDocRequest):
 app.mount("/output", StaticFiles(directory=OUTPUT_DIR), name="output")
 
 
-@app.get("/")
-def root():
+@app.get("/api/status")
+def status():
     return {"status": "ok", "docs": "/docs"}
+
+
+# Serve the frontend (index.html, style.css, script.js) from the same
+# service, so in production the frontend and backend share one origin —
+# which is what script.js's API_BASE logic (window.location.origin) expects.
+# Tries a couple of likely folder names/casings since repo structure varies.
+import os
+
+_here = os.path.dirname(__file__)
+_frontend_candidates = ["Frontend", "frontend", "../Frontend", "../frontend"]
+_frontend_dir = next(
+    (os.path.join(_here, c) for c in _frontend_candidates if os.path.isdir(os.path.join(_here, c))),
+    None,
+)
+
+if _frontend_dir:
+    app.mount("/", StaticFiles(directory=_frontend_dir, html=True), name="frontend")
+else:
+    print("WARNING: frontend folder not found next to main.py — only the API will be served.")
