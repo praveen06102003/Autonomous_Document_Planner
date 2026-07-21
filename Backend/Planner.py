@@ -63,6 +63,45 @@ complete task breakdown yourself.
    - If the request mixes both (some tasks given, some missing), fill in \
 only the missing gaps and make a reasonable assumption, noting the \
 assumption in the "notes" field.
+   - If the request is a software/technical project (mentions a tech \
+stack, an app, a website, an API, etc.), structure the tasks the way a \
+real developer would actually work through it day by day — e.g. system/ \
+architecture design first, then backend setup, then core feature \
+implementation, then frontend/UI work, then integration, then testing \
+and bug fixes, then final review/deployment. Do NOT default to vague, \
+research-style phrasing like "research and gather information" or \
+"review existing documentation" unless the user's request genuinely \
+has no clear technical scope yet.
+   - Phrase each task the way a developer would describe what they're \
+actually doing that day — direct and concrete (e.g. "Set up Django \
+project structure and configure MySQL database connection", "Build \
+Angular components for the product listing and cart pages") — not a \
+passive description of an activity category (e.g. avoid vague phrasing \
+like "Design high-level architecture" with no specifics; instead say \
+what is actually being designed, using the tech stack the user gave).
+3a. For every task's "notes" field, be technically precise and concrete — \
+write it the way a senior developer would document their own work for \
+a teammate to understand later, using the EXACT tools/languages/ \
+frameworks/stack the user mentioned in their own request (never \
+substitute a different stack than what they specified). This means:
+   - Reference actual folder/file structure conventions appropriate to \
+whatever stack the user mentioned (e.g. a backend folder, a frontend \
+folder, config/dependency files at the appropriate location for that \
+ecosystem — Python projects use `requirements.txt`, Node projects use \
+`package.json`, and so on).
+   - Reference specific setup commands, config files, or tools that are \
+standard for the mentioned stack (e.g. the actual CLI/init command used \
+to scaffold a project in that framework, or the config file where \
+settings like a database connection would normally go).
+   - Reference concrete component/module/table/class names that make \
+sense given the user's specific request — never a generic description \
+like "build frontend components" or "set up backend" without naming \
+what those components/modules actually are for this project.
+   - The goal: if another developer read only the "notes" field, they \
+should understand exactly what was built, where, and using what \
+convention — without needing to ask follow-up questions. This applies \
+regardless of what stack, language, or type of project the user \
+describes — adapt the specifics to whatever they actually asked for.
 4. If the request spans a specific number of days (e.g. "10 day plan"), \
 you MUST produce a task for every single day in that range, in order, \
 with no gaps or skipped days. Do not jump from Day 3 to Day 9 — cover \
@@ -79,6 +118,26 @@ request implies a duration (e.g. "10 day plan" -> Day 1 = tomorrow's real \
 date, Day 2 = the day after, and so on), OR
    - A relative label like "Day 1", "Week 1" ONLY if the user gave no \
 timeframe at all to anchor against.
+7. If the request involves a system/architecture with distinct \
+components (e.g. frontend, backend, database, external services), also \
+generate a "diagram" field: a Mermaid.js flowchart definition using \
+"graph TD" syntax, based on the ACTUAL components/stack the user \
+mentioned in their own request. Keep it to 4-8 nodes — high-level, not \
+exhaustive. STRICT syntax rules to avoid parse errors:
+   - Wrap EVERY node label in double quotes inside the brackets, e.g. \
+A["Label Here"] — never A[Label Here] without quotes.
+   - Use simple alphanumeric node IDs only (A, B, C, D...) — never use \
+spaces, dots, or special characters as node IDs themselves.
+   - Avoid parentheses, colons, or semicolons inside node labels; use \
+plain words and slashes/dashes only, always within quotes as shown above.
+   - Generic syntax pattern to follow (substitute in the user's actual \
+components — do NOT copy this example's content, it is illustrative \
+of syntax only):
+graph TD
+    A["Component One"] --> B["Component Two"]
+    B --> C["Component Three"]
+   - If the request has no clear architecture/components to diagram, \
+omit the "diagram" field or set it to an empty string.
 
 Respond ONLY with JSON in this exact shape:
 {{
@@ -87,7 +146,8 @@ Respond ONLY with JSON in this exact shape:
   "summary": "string",
   "tasks": [
     {{"task": "string", "notes": "string", "status": "string", "deadline": "string"}}
-  ]
+  ],
+  "diagram": "string (Mermaid syntax, or empty string if not applicable)"
 }}
 """
 
@@ -167,6 +227,8 @@ def _validate_plan(result: dict) -> dict:
         raise ValueError("LLM response missing required 'title' or 'tasks' fields")
     if "summary" not in result:
         result["summary"] = ""  # degrade gracefully rather than fail the whole request
+    if "diagram" not in result:
+        result["diagram"] = ""   # NEW — degrade gracefully if the LLM omits it
     if not isinstance(result["tasks"], list) or len(result["tasks"]) == 0:
         raise ValueError("LLM response contained no tasks")
     return result

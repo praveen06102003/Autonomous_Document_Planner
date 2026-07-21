@@ -24,14 +24,14 @@ class AgentRequest(BaseModel):
 
 
 class AgentResponse(BaseModel):
-    is_plan: bool = True         # False when the message wasn't actually a planning request
-    plan_id: Optional[str] = None      # None when is_plan is False — no plan was created
+    is_plan: bool = True
+    plan_id: Optional[str] = None
     title: Optional[str] = None
     summary: Optional[str] = None
     tasks: list[TaskItem] = []
-    message: str                 # for is_plan=False, this IS the conversational reply
+    diagram: Optional[str] = ""   # NEW — Mermaid syntax, empty string if not applicable
+    message: str
     revision: int = 1
-
 
 # ---------- POST /agent/refine ----------
 

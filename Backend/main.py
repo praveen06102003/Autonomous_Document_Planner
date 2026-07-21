@@ -62,17 +62,24 @@ def create_plan(payload: AgentRequest):
 
     plan_id = str(uuid.uuid4())[:8]
     tasks = [TaskItem(**t) for t in result["tasks"]]
-    PLAN_STORE[plan_id] = {"title": result["title"], "tasks": tasks, "summary": result["summary"], "revision": 1}
+    PLAN_STORE[plan_id] = {
+    "title": result["title"],
+    "tasks": tasks,
+    "summary": result["summary"],
+    "diagram": result.get("diagram", ""),   # NEW
+    "revision": 1
+}
 
     return AgentResponse(
-        is_plan=True,
-        plan_id=plan_id,
-        title=result["title"],
-        summary=result["summary"],
-        tasks=tasks,
-        message="Let me know if you'd like anything changed, or confirm to generate the document.",
-        revision=1,
-    )
+    is_plan=True,
+    plan_id=plan_id,
+    title=result["title"],
+    summary=result["summary"],
+    tasks=tasks,
+    diagram=result.get("diagram", ""),   # NEW
+    message="Let me know if you'd like anything changed, or confirm to generate the document.",
+    revision=1,
+)
 
 
 @app.post("/agent/refine", response_model=RefineResponse)
@@ -141,15 +148,19 @@ def generate_doc(payload: GenerateDocRequest):
         raise HTTPException(status_code=404, detail="Plan not found. It may have expired — try creating a new one.")
 
     tasks_as_dicts = [t.model_dump() for t in plan["tasks"]]
-    filename = build_document(payload.plan_id, plan["title"], tasks_as_dicts)
+    filename = build_document(
+        plan_id=payload.plan_id,          # FIXED — was undefined `plan_id`
+        title=plan["title"],
+        summary=plan.get("summary", ""),
+        tasks=tasks_as_dicts,              # FIXED — was `plan["tasks"]` (TaskItem objects, not dicts)
+        diagram=plan.get("diagram", "")
+    )
 
     return GenerateDocResponse(
         doc_filename=filename,
         download_url=f"/output/{filename}",
         message="Document generated successfully.",
     )
-
-
 # Serve generated .docx files for download
 app.mount("/output", StaticFiles(directory=OUTPUT_DIR), name="output")
 

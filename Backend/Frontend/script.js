@@ -155,43 +155,30 @@ function formatDeadline(deadline) {
 
 // ---------- Canvas (plan) rendering ----------
 
+const planSummary = document.getElementById("plan-summary"); // NEW ref
+const taskList = document.getElementById("task-list"); // CHANGED from taskTbody
+
 function renderTasks(tasks) {
   currentTasks = tasks.map(t => ({ ...t }));
-  taskTbody.innerHTML = "";
+  taskList.innerHTML = "";
 
   currentTasks.forEach((task, i) => {
-    const tr = document.createElement("tr");
-    const optionsHtml = STATUS_OPTIONS.map(opt =>
-      `<option value="${opt.value}" ${opt.value === (task.status || "Not started") ? "selected" : ""}>${opt.label}</option>`
-    ).join("");
+    const li = document.createElement("li");
+    li.className = "task-item";
 
-    tr.innerHTML = `
-      <td class="row-tag">T${i + 1}</td>
-      <td>${escapeHtml(task.task)}</td>
-      <td>${escapeHtml(task.notes || "")}</td>
-      <td>
-        <select class="status-select ${statusClass(task.status)}" data-index="${i}">
-          ${optionsHtml}
-        </select>
-      </td>
-      <td class="deadline-tag">${escapeHtml(formatDeadline(task.deadline))}</td>
+    li.innerHTML = `
+      <div class="task-main">
+        <strong>${escapeHtml(task.task)}</strong>
+        <span class="deadline-tag">${escapeHtml(formatDeadline(task.deadline))}</span>
+      </div>
+      <p class="task-notes">${escapeHtml(task.notes || "")}</p>
     `;
-    taskTbody.appendChild(tr);
-  });
-
-  taskTbody.querySelectorAll(".status-select").forEach(select => {
-    select.addEventListener("change", (e) => {
-      const idx = Number(e.target.dataset.index);
-      currentTasks[idx].status = e.target.value;
-      e.target.className = `status-select ${statusClass(e.target.value)}`;
-    });
+    taskList.appendChild(li);
   });
 }
 
 function renderPlan(data) {
   if (data.is_plan === false) {
-    // Not a planning request (a question, greeting, small talk) — just
-    // reply in chat, leave the canvas panel untouched.
     addChatMessage("agent", data.message);
     return;
   }
@@ -206,10 +193,28 @@ function renderPlan(data) {
   planTitle.textContent = data.title;
   revisionBadge.textContent = `Revision ${data.revision}`;
   renderTasks(data.tasks);
+  renderDiagram(data.diagram);   // NEW
 
   addChatMessage("agent", `${data.summary} ${data.message}`.trim());
 }
+const diagramContainer = document.getElementById("diagram-container");
 
+async function renderDiagram(diagramText) {
+  if (!diagramText || !diagramText.trim()) {
+    diagramContainer.innerHTML = "";
+    diagramContainer.classList.add("hidden");
+    return;
+  }
+  diagramContainer.classList.remove("hidden");
+  try {
+    const { svg } = await window.mermaid.render(`diagram-svg-${Date.now()}`, diagramText);
+    diagramContainer.innerHTML = svg;
+  } catch (err) {
+    console.error("Mermaid render error:", err);
+    // Fallback: show the raw flow as readable text instead of an error banner
+    diagramContainer.innerHTML = `<pre class="diagram-fallback">${escapeHtml(diagramText)}</pre>`;
+  }
+}
 // ---------- API calls ----------
 
 async function callApi(path, body) {

@@ -1,13 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Agent Console — Autonomous Document Planner</title>
-<link rel="stylesheet" href="index.css" />
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Agent Console — Autonomous Document Planner</title>
+  <link rel="stylesheet" href="index.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
 </head>
+
 <body>
 
   <header class="console-header">
@@ -34,11 +38,7 @@
       <p class="error-banner hidden" id="error-banner"></p>
 
       <div class="chat-input-row">
-        <textarea
-          id="chat-input"
-          placeholder="e.g. I need a plan for building a RAG project"
-          rows="2"
-        ></textarea>
+        <textarea id="chat-input" placeholder="e.g. I need a plan for building a RAG project" rows="2"></textarea>
         <button id="chat-send-btn" class="btn btn-primary">
           <span class="btn-label">Send</span>
         </button>
@@ -53,7 +53,7 @@
         <p>Your plan will appear here once generated.</p>
       </div>
 
-      <div class="canvas-content hidden" id="canvas-content">
+      <!-- <div class="canvas-content hidden" id="canvas-content">
         <div class="plan-header">
           <h2 id="plan-title">—</h2>
           <span class="revision-badge" id="revision-badge">Revision 1</span>
@@ -84,12 +84,41 @@
           </div>
           <a id="download-link" class="btn btn-primary" href="#" download>Download .docx</a>
         </div>
-      </div>
+      </div> -->
+      <div class="canvas-content hidden" id="canvas-content">
+        <div class="plan-header">
+          <h2 id="plan-title">—</h2>
+          <span class="revision-badge" id="revision-badge">Revision 1</span>
+        </div>
 
+        <p class="doc-summary" id="plan-summary"></p>
+
+        <h3 class="doc-heading">Action Plan</h3>
+        <ul class="task-list" id="task-list"></ul>
+        <h3 class="doc-heading">Architecture Diagram</h3>
+        <div class="diagram-container" id="diagram-container"></div>
+        <div class="decision-row" id="decision-row">
+          <button id="looks-good-btn" class="btn btn-primary">Looks good — generate document</button>
+        </div>
+
+        <div class="result-panel hidden" id="result-panel">
+          <div class="result-icon">✓</div>
+          <div class="result-copy">
+            <h3>Document generated</h3>
+            <p id="result-filename"></p>
+          </div>
+          <a id="download-link" class="btn btn-primary" href="#" download>Download .docx</a>
+        </div>
+      </div>
     </section>
 
   </div>
-
-<script src="script.js"></script>
+  <script type="module">
+  import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+  mermaid.initialize({ startOnLoad: false, theme: "neutral" });
+  window.mermaid = mermaid;
+  </script>
+  <script src="script.js"></script>
 </body>
+
 </html>
